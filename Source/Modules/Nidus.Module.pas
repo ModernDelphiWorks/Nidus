@@ -1,0 +1,216 @@
+﻿{
+  ------------------------------------------------------------------------------
+  Nidus
+  Modular and scalable application framework for Delphi,
+  inspired by the architectural patterns of NestJS.
+
+  SPDX-License-Identifier: Apache-2.0
+  Copyright (c) 2025-2026 Isaque Pinheiro
+
+  Licensed under the Apache License, Version 2.0.
+  See the LICENSE file in the project root for full license information.
+  ------------------------------------------------------------------------------
+}
+
+unit Nidus.Module;
+
+interface
+
+uses
+  Rtti,
+  TypInfo,
+  SysUtils,
+  Generics.Collections,
+  Inject.Events,
+  Nidus.Module.Abstract,
+  Nidus.Route.Abstract,
+  Nidus.Module.Service,
+  Nidus.Route.Manager,
+  Nidus.Route,
+  Nidus.Route.Handler,
+  Nidus.Bind,
+  Nidus.Injector,
+  Nidus.Request,
+  Nidus.Listener;
+
+type
+  TValue = Rtti.TValue;
+  TRouteMiddleware = Nidus.Route.Abstract.TRouteMiddleware;
+  TRoute = Nidus.Route.TRoute;
+  TRouteAbstract = Nidus.Route.Abstract.TRouteAbstract;
+  TRoutes = Nidus.Module.Abstract.TRoutes;
+  TBinds = Nidus.Module.Abstract.TBinds;
+  TImports = Nidus.Module.Abstract.TImports;
+  TExportedBinds = Nidus.Module.Abstract.TExportedBinds;
+  TConstructorParams = Inject.Events.TConstructorParams;
+  TRouteHandlers = Nidus.Module.Abstract.TRouteHandlers;
+  TRouteManager = Nidus.Route.Manager.TRouteManager;
+  IRouteRequest = Nidus.Request.IRouteRequest;
+
+  TModule = class;
+
+  TModule = class(TModuleAbstract)
+  private
+    FAppInjector: PAppInjector;
+    FRouteHandlers: TObjectList<TRouteHandler>;
+    FService: TModuleService;
+    procedure _DestroyRoutes;
+    procedure _DestroyInjector;
+    procedure _AddRoutes;
+    procedure _BindModule;
+    procedure _RouteHandlers;
+  public
+    constructor Create; override;
+    destructor Destroy; override;
+    function Routes: TRoutes; override;
+    function Binds: TBinds; override;
+    function Imports: TImports; override;
+    function ExportedBinds: TExportedBinds; override;
+    function RouteHandlers: TRouteHandlers; override;
+  end;
+
+  // S? para facilitar a sintaxe nos m?dulos
+  Bind<T: class, constructor> = class(TBind<T>)
+  end;
+
+// RouteModule
+function RouteModule(const APath: String;
+  const AModule: TModuleClass): TRouteModule; overload;
+function RouteModule(const APath: String; const AModule: TModuleClass;
+  const AMiddlewares: TMiddlewares): TRouteModule; overload;
+
+// RouteChild
+function RouteChild(const APath: String; const AModule: TModuleClass;
+  const AMiddlewares: TMiddlewares = []): TRouteChild;
+
+implementation
+
+uses
+  ModernSyntax.Objects,
+  Nidus.Exception;
+
+function RouteModule(const APath: String; const AModule: TModuleClass): TRouteModule;
+begin
+  Result := nil;
+  if Assigned(AModule) then
+    Result := TRouteModule.AddModule(APath, AModule, nil{, []}) as TRouteModule;
+end;
+
+function RouteModule(const APath: String; const AModule: TModuleClass;
+  const AMiddlewares: TMiddlewares): TRouteModule;
+begin
+  Result := nil;
+  if Assigned(AModule) then
+    Result := TRouteModule.AddModule(APath,
+                                     AModule,
+                                     AMiddlewares) as TRouteModule;
+end;
+
+function RouteChild(const APath: String; const AModule: TModuleClass;
+  const AMiddlewares: TMiddlewares): TRouteChild;
+begin
+  Result := TRouteChild.AddModule(APath,
+                                  AModule,
+                                  AMiddlewares) as TRouteChild;
+end;
+
+{ TModuleAbstract }
+
+constructor TModule.Create;
+begin
+  FAppInjector := GAppInjector;
+  if not Assigned(FAppInjector) then
+    raise EAppInjector.Create;
+  // Service inject
+  FService := FAppInjector^.Get<TModuleService>;
+  // Routehandler list
+  FRouteHandlers := TObjectList<TRouteHandler>.Create;
+  // Load binds
+  _BindModule;
+  // Load routes
+  _AddRoutes;
+  // Load routehandles
+  _RouteHandlers;
+end;
+
+destructor TModule.Destroy;
+begin
+  FAppInjector := nil;
+  // Destroy as rotas do modulo
+  _DestroyRoutes;
+  // Destroy o injector do modulo
+  _DestroyInjector;
+  // Libera o servi?o
+  FService.Free;
+  // Libera os routehendlers
+  FRouteHandlers.Free;
+  // Console delphi
+  inherited;
+end;
+
+function TModule.Binds: TBinds;
+begin
+  Result := [];
+end;
+
+function TModule.ExportedBinds: TExportedBinds;
+begin
+  Result := [];
+end;
+
+function TModule.Imports: TImports;
+begin
+  Result := [];
+end;
+
+function TModule.RouteHandlers: TRouteHandlers;
+begin
+  Result := [];
+end;
+
+function TModule.Routes: TRoutes;
+begin
+  Result := [];
+end;
+
+procedure TModule._BindModule;
+begin
+  FService.BindModule(Self)
+end;
+
+procedure TModule._AddRoutes;
+begin
+  FService.AddRoutes(Self);
+end;
+
+procedure TModule._DestroyInjector;
+begin
+  FService.ExtractInjector<TAppInjector>(Self.ClassName);
+end;
+
+procedure TModule._DestroyRoutes;
+begin
+  FService.RemoveRoutes(Self.ClassName);
+end;
+
+procedure TModule._RouteHandlers;
+var
+  LHandler: TClass;
+  LObjectEx: TModernObject;
+begin
+  LObjectEx := FAppInjector^.Get<TModernObject>;
+  if not Assigned(LObjectEx) then
+    Exit;
+  for LHandler in RouteHandlers do
+    FRouteHandlers.Add(TRouteHandler(LObjectEx.Factory(LHandler)));
+end;
+
+end.
+
+
+
+
+
+
+
+

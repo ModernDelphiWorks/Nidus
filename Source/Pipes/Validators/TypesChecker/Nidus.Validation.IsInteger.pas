@@ -1,0 +1,63 @@
+﻿{
+  ------------------------------------------------------------------------------
+  Nidus
+  Modular and scalable application framework for Delphi,
+  inspired by the architectural patterns of NestJS.
+
+  SPDX-License-Identifier: Apache-2.0
+  Copyright (c) 2025-2026 Isaque Pinheiro
+
+  Licensed under the Apache License, Version 2.0.
+  See the LICENSE file in the project root for full license information.
+  ------------------------------------------------------------------------------
+}
+
+unit Nidus.Validation.IsInteger;
+
+interface
+
+uses
+  Rtti,
+  SysUtils,
+  StrUtils,
+  Nidus.Validator.Constraint,
+  Nidus.Validation.Interfaces;
+
+type
+  TIsInteger = class(TValidatorConstraint)
+  public
+    function Validate(const Value: TValue;
+      const Args: IValidationArguments): TResultValidation; override;
+  end;
+
+implementation
+
+{ TIsInteger }
+
+function TIsInteger.Validate(const Value: TValue;
+  const Args: IValidationArguments): TResultValidation;
+var
+  LMessage: String;
+begin
+  Result.Success(False);
+  if Value.Kind in [tkInt64, tkInteger] then
+    Result.Success(True);
+  if not Result.ValueSuccess then
+  begin
+    LMessage := IfThen(Args.Message = '',
+                       Format('[%s] %s->%s [%s] must be an integer number',
+                       [Args.TagName,
+                        Args.TypeName,
+                        Args.Values[Length(Args.Values) -1].ToString,
+                        Args.FieldName]), Args.Message);
+    Result.Failure(LMessage);
+  end;
+end;
+
+end.
+
+
+
+
+
+

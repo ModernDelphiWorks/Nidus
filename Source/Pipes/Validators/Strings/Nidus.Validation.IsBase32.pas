@@ -1,0 +1,59 @@
+﻿{
+  ------------------------------------------------------------------------------
+  Nidus
+  Modular and scalable application framework for Delphi,
+  inspired by the architectural patterns of NestJS.
+
+  SPDX-License-Identifier: Apache-2.0
+  Copyright (c) 2025-2026 Isaque Pinheiro
+
+  Licensed under the Apache License, Version 2.0.
+  See the LICENSE file in the project root for full license information.
+  ------------------------------------------------------------------------------
+}
+
+unit Nidus.Validation.IsBase32;
+
+interface
+
+uses
+  Rtti,
+  SysUtils,
+  StrUtils,
+  Nidus.Validator.Constraint,
+  Nidus.Validation.Interfaces;
+
+type
+  TIsbase32 = class(TValidatorConstraint)
+  public
+    function Validate(const Value: TValue;
+      const Args: IValidationArguments): TResultValidation; override;
+  end;
+
+implementation
+
+{ TIsbase32 }
+
+function TIsbase32.Validate(const Value: TValue;
+  const Args: IValidationArguments): TResultValidation;
+var
+  LMessage: String;
+begin
+  Result.Success(False);
+  
+  // TODO: Implement validation logic for isbase32
+  // This is a template - implement the actual validation logic
+  
+  if not Result.ValueSuccess then
+  begin
+    LMessage := IfThen(Args.Message = '',
+                       Format('[%s] %s->%s [%s] validation failed for isbase32',
+                       [Args.TagName,
+                        Args.TypeName,
+                        Args.Values[Length(Args.Values) -1].ToString,
+                        Args.FieldName]), Args.Message);
+    Result.Failure(LMessage);
+  end;
+end;
+
+end.

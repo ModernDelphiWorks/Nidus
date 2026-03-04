@@ -1,29 +1,17 @@
 ﻿{
-             Nest4D - Development Framework for Delphi
+  ------------------------------------------------------------------------------
+  Nidus
+  Modular and scalable application framework for Delphi,
+  inspired by the architectural patterns of NestJS.
 
-                   Copyright (c) 2023, Isaque Pinheiro
-                          All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+  Copyright (c) 2025-2026 Isaque Pinheiro
 
-                    GNU Lesser General Public License
-                      Vers?o 3, 29 de junho de 2007
-
-       Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
-       A todos ? permitido copiar e distribuir c?pias deste documento de
-       licen?a, mas mud?-lo n?o ? permitido.
-
-       Esta vers?o da GNU Lesser General Public License incorpora
-       os termos e condi??es da vers?o 3 da GNU General Public License
-       Licen?a, complementado pelas permiss?es adicionais listadas no
-       arquivo LICENSE na pasta principal.
+  Licensed under the Apache License, Version 2.0.
+  See the LICENSE file in the project root for full license information.
+  ------------------------------------------------------------------------------
 }
 
-{
-  @abstract(Nest4D Framework for Delphi)
-  @created(01 Mai 2023)
-  @author(Isaque Pinheiro <isaquesp@gmail.com>)
-  @homepage(https://www.isaquepinheiro.com.br)
-  @documentation(https://nest4d-en.docs-br.com)
-}
 
 unit Nidus;
 
@@ -36,24 +24,24 @@ uses
   SysUtils,
   StrUtils,
   Generics.Collections,
-  Injector.Service,
-  Evolution.ResultPair,
-  Nest.Module,
-  Nest.Route.Parse,
-  Nest.Module.Service,
-  Nest.Bind.Service,
-  Nest.Validation.Interfaces,
-  Nest.Route.Handler,
-  Nest.RPC.Interfaces,
-  Nest.RPC.Resource,
-  Nest.Injector,
-  Nest.Exception,
-  Nest.Register,
-  Nest.Request,
-  Nest.Listener;
+  Inject.Service,
+  ModernSyntax.ResultPair,
+  Nidus.Module,
+  Nidus.Route.Parse,
+  Nidus.Module.Service,
+  Nidus.Bind.Service,
+  Nidus.Validation.Interfaces,
+  Nidus.Route.Handler,
+  Nidus.RPC.Interfaces,
+  Nidus.RPC.Resource,
+  Nidus.Injector,
+  Nidus.Exception,
+  Nidus.Register,
+  Nidus.Request,
+  Nidus.Listener;
 
 type
-  TNest4D = class sealed
+  TNidus = class sealed
   strict private
     class var FListener: TAppListener;
   private
@@ -76,16 +64,16 @@ type
     procedure IncludeBindService(const AService: TBindService);
     procedure IncludeRouteParser(const ARouteParse: TRouteParse);
     function Start(const AModule: TModule;
-      const AInitialRoutePath: String = '/'): TNest4D;
+      const AInitialRoutePath: String = '/'): TNidus;
     procedure Finalize;
     procedure DisposeRouteModule(const APath: String);
     procedure RegisterRouteHandler(const ARouteHandler: TRouteHandlerClass);
     procedure Listener(const AMessage: String);
-    function UseGuard(const AGuardCallback: TGuardCallback): TNest4D;
-    function UsePipes(const AValidationPipe: IValidationPipe): TNest4D;
-    function UseRPC(const ARPCProviderServer: IRPCProviderServer): TNest4D;
-    class function UseListener(const AListener: TListener): TNest4D;
-    function PublishRPC(const ARPCName: String; const ARPCClass: TRPCResourceClass): TNest4D;
+    function UseGuard(const AGuardCallback: TGuardCallback): TNidus;
+    function UsePipes(const AValidationPipe: IValidationPipe): TNidus;
+    function UseRPC(const ARPCProviderServer: IRPCProviderServer): TNidus;
+    class function UseListener(const AListener: TListener): TNidus;
+    function PublishRPC(const ARPCName: String; const ARPCClass: TRPCResourceClass): TNidus;
     function LoadRouteModule(const APath: String;
       const AReq: IRouteRequest = nil): TReturnPair;
     function Get<T: class, constructor>(ATag: String = ''): T;
@@ -93,18 +81,18 @@ type
     function Request: IRouteRequest;
   end;
 
-function GetNest4d: TNest4D;
+function GetNidus: TNidus;
 
 implementation
 
 { TNest4D }
 
-function GetNest4d: TNest4D;
+function GetNidus: TNidus;
 begin
-  Result := GAppInjector^.Get<TNest4D>;
+  Result := GAppInjector^.Get<TNidus>;
 end;
 
-constructor TNest.Create;
+constructor TNidus.Create;
 begin
   FAppInjector := GAppInjector;
   if not Assigned(FAppInjector) then
@@ -113,7 +101,7 @@ begin
   FRegister := FAppInjector^.Get<TRegister>;
 end;
 
-destructor TNest.Destroy;
+destructor TNidus.Destroy;
 begin
   FAppInjector := nil;
   if Assigned(FBindService) then
@@ -129,7 +117,7 @@ begin
   inherited;
 end;
 
-function TNest.GetInterface<I>(ATag: String = ''): I;
+function TNidus.GetInterface<I>(ATag: String = ''): I;
 var
   LResult: TResultPair<I, Exception>;
 begin
@@ -146,7 +134,7 @@ begin
   Result := LResult.ValueSuccess;
 end;
 
-function TNest.Get<T>(ATag: String): T;
+function TNidus.Get<T>(ATag: String): T;
 var
   LResult: TResultPair<T, Exception>;
 begin
@@ -163,23 +151,23 @@ begin
   Result := LResult.ValueSuccess;
 end;
 
-procedure TNest.IncludeBindService(const AService: TBindService);
+procedure TNidus.IncludeBindService(const AService: TBindService);
 begin
   FBindService := AService;
 end;
 
-procedure TNest.IncludeModuleService(const AService: TModuleService);
+procedure TNidus.IncludeModuleService(const AService: TModuleService);
 begin
   FModuleService := AService;
 end;
 
-procedure TNest.IncludeRouteParser(const ARouteParse: TRouteParse);
+procedure TNidus.IncludeRouteParser(const ARouteParse: TRouteParse);
 begin
   FRouteParse := ARouteParse;
 end;
 
-function TNest.Start(const AModule: TModule;
-  const AInitialRoutePath: String): TNest4D;
+function TNidus.Start(const AModule: TModule;
+  const AInitialRoutePath: String): TNidus;
 var
   LModule: TClass;
 begin
@@ -200,13 +188,13 @@ begin
   end;
 end;
 
-function TNest.UseGuard(const AGuardCallback: TGuardCallback): TNest4D;
+function TNidus.UseGuard(const AGuardCallback: TGuardCallback): TNidus;
 begin
   FGuardCallback := AGuardCallback;
   Result := Self;
 end;
 
-class function TNest.UseListener(const AListener: TListener): TNest4D;
+class function TNidus.UseListener(const AListener: TListener): TNidus;
 begin
   if not Assigned(AListener) then
     Exit;
@@ -214,20 +202,20 @@ begin
   FListener := GAppInjector^.Get<TAppListener>;
 end;
 
-function TNest.UsePipes(const AValidationPipe: IValidationPipe): TNest4D;
+function TNidus.UsePipes(const AValidationPipe: IValidationPipe): TNidus;
 begin
   FRegister.UsePipes(AValidationPipe);
   Result := Self;
 end;
 
-function TNest.UseRPC(const ARPCProviderServer: IRPCProviderServer): TNest4D;
+function TNidus.UseRPC(const ARPCProviderServer: IRPCProviderServer): TNidus;
 begin
   FRPCProviderServer := ARPCProviderServer;
   FRPCProviderServer.Start;
   Result := Self;
 end;
 
-function TNest.LoadRouteModule(const APath: String;
+function TNidus.LoadRouteModule(const APath: String;
   const AReq: IRouteRequest): TReturnPair;
 var
   LRouteHandle: TClass;
@@ -258,14 +246,14 @@ begin
   Result := FRouteParse.SelectRoute(APath, AReq);
 end;
 
-procedure TNest.Listener(const AMessage: String);
+procedure TNidus.Listener(const AMessage: String);
 begin
   if Assigned(FListener) then
     FListener.Execute(AMessage);
 end;
 
-function TNest.PublishRPC(const ARPCName: String;
-  const ARPCClass: TRPCResourceClass): TNest4D;
+function TNidus.PublishRPC(const ARPCName: String;
+  const ARPCClass: TRPCResourceClass): TNidus;
 begin
   if not Assigned(FRPCProviderServer) then
     raise ERPCProviderNotSetException.Create;
@@ -273,29 +261,29 @@ begin
   Result := Self;
 end;
 
-procedure TNest.RegisterRouteHandler(const ARouteHandler: TRouteHandlerClass);
+procedure TNidus.RegisterRouteHandler(const ARouteHandler: TRouteHandlerClass);
 begin
   FRegister.Add(ARouteHandler);
 end;
 
-function TNest.Request: IRouteRequest;
+function TNidus.Request: IRouteRequest;
 begin
   Result := FRequest;
 end;
 
-procedure TNest.DisposeRouteModule(const APath: String);
+procedure TNidus.DisposeRouteModule(const APath: String);
 begin
   _ResolveDisposeRouteModule(APath);
 end;
 
-procedure TNest.Finalize;
+procedure TNidus.Finalize;
 begin
   // Do not change the order.
   FAppModule.Free;
   FAppInjector^.ExtractInjector<TAppInjector>(C_NEST4D);
 end;
 
-procedure TNest._ResolveDisposeRouteModule(const APath: String);
+procedure TNidus._ResolveDisposeRouteModule(const APath: String);
 var
   LRoutes: TStringDynArray;
   LRoute: String;
@@ -313,6 +301,7 @@ begin
 end;
 
 end.
+
 
 
 
