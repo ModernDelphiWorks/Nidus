@@ -22,7 +22,7 @@ uses
   Nidus.Exception,
   Nidus.Tracker,
   Nidus.Module.Abstract,
-  Nidus.Injector,
+  Nidus.Inject,
   Nidus.Listener,
   Nidus.Route,
   Nidus.Route.Abstract,
@@ -34,7 +34,7 @@ type
   TRouteProvider = class
   private
     FTracker: TTracker;
-    FAppInjector: PAppInjector;
+    FNidusInject: PNidusInject;
     FObjectEx: TModernObject;
     function _RouteMiddleware(const ARoute: TRouteAbstract): TRouteAbstract;
   public
@@ -48,15 +48,15 @@ implementation
 
 constructor TRouteProvider.Create;
 begin
-  FAppInjector := GAppInjector;
-  if not Assigned(FAppInjector) then
+  FNidusInject := GNidusInject;
+  if not Assigned(FNidusInject) then
     raise EAppInjector.Create;
-  FObjectEx := FAppInjector^.Get<TModernObject>;
+  FObjectEx := FNidusInject^.Get<TModernObject>;
 end;
 
 destructor TRouteProvider.Destroy;
 begin
-  FAppInjector := nil;
+  FNidusInject := nil;
   if Assigned(FTracker) then
     FTracker := nil;
   inherited;
@@ -92,7 +92,7 @@ begin
   if not Assigned(Result.ValueSuccess.ModuleInstance) then
   begin
     Result.ValueSuccess.ModuleInstance := FObjectEx.Factory(Result.ValueSuccess.Module);
-    LListener := FAppInjector^.Get<TAppListener>;
+    LListener := FNidusInject^.Get<TAppListener>;
     if Assigned(LListener) then
       LListener.Execute(FormatListenerMessage(Format('[InstanceLoader] %s dependencies initialized', [Result.ValueSuccess.ModuleInstance.ClassName])));
   end;

@@ -30,7 +30,7 @@ uses
   Nidus.Request,
   Nidus.Exception,
   Nidus.Listener,
-  Nidus.Injector,
+  Nidus.Inject,
   Nidus.Module;
 
 type
@@ -39,7 +39,7 @@ type
 
   TRouteParse = class
   private
-    FAppInjector: PAppInjector;
+    FNidusInject: PNidusInject;
     FService: TRouteService;
     FRouteManager: TRouteManager;
     procedure _ResolveRoutes(const APath: String;
@@ -58,15 +58,15 @@ implementation
 
 constructor TRouteParse.Create;
 begin
-  FAppInjector := GAppInjector;
-  if not Assigned(FAppInjector) then
+  FNidusInject := GNidusInject;
+  if not Assigned(FNidusInject) then
     raise EAppInjector.Create;
-  FRouteManager := FAppInjector^.Get<TRouteManager>;
+  FRouteManager := FNidusInject^.Get<TRouteManager>;
 end;
 
 destructor TRouteParse.Destroy;
 begin
-  FAppInjector := nil;
+  FNidusInject := nil;
   FService.Free;
   inherited;
 end;
@@ -95,7 +95,7 @@ begin
   begin
     LArgs := TRouteParam.Create(LPath, AReq);
     LRouteResult := FService.GetRoute(LArgs);
-    LListener := FAppInjector^.Get<TAppListener>;
+    LListener := FNidusInject^.Get<TAppListener>;
     if Assigned(LListener) then
       LListener.Execute(FormatListenerMessage(Format('[RoutesResolver] %s', [APath])));
   end

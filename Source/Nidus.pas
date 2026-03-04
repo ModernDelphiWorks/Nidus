@@ -34,7 +34,7 @@ uses
   Nidus.Route.Handler,
   Nidus.RPC.Interfaces,
   Nidus.RPC.Resource,
-  Nidus.Injector,
+  Nidus.Inject,
   Nidus.Exception,
   Nidus.Register,
   Nidus.Request,
@@ -45,7 +45,7 @@ type
   strict private
     class var FListener: TAppListener;
   private
-    FAppInjector: PAppInjector;
+    FNidusInject: PNidusInject;
     FInitialRoutePath: String;
     FAppModule: TModule;
     FRouteParse: TRouteParse;
@@ -85,25 +85,25 @@ function GetNidus: TNidus;
 
 implementation
 
-{ TNest4D }
+{ TNidus }
 
 function GetNidus: TNidus;
 begin
-  Result := GAppInjector^.Get<TNidus>;
+  Result := GNidusInject^.Get<TNidus>;
 end;
 
 constructor TNidus.Create;
 begin
-  FAppInjector := GAppInjector;
-  if not Assigned(FAppInjector) then
+  FNidusInject := GNidusInject;
+  if not Assigned(FNidusInject) then
     raise EAppInjector.Create;
   FModuleStarted := False;
-  FRegister := FAppInjector^.Get<TRegister>;
+  FRegister := FNidusInject^.Get<TRegister>;
 end;
 
 destructor TNidus.Destroy;
 begin
-  FAppInjector := nil;
+  FNidusInject := nil;
   if Assigned(FBindService) then
     FBindService.Free;
   if Assigned(FModuleService) then
@@ -181,7 +181,7 @@ begin
   Result := Self;
   if Assigned(FListener) then
   begin
-    FListener.Execute(FormatListenerMessage('[Nest4dStart] Starting Nest4D application...'));
+    FListener.Execute(FormatListenerMessage('[NidusStart] Starting Nidus application...'));
     FListener.Execute(FormatListenerMessage('[InstanceLoader] AppModule dependencies initialized'));
     for LModule in AModule.Imports do
       FListener.Execute(FormatListenerMessage(Format('[InstanceImported] %s dependencies imported', [LModule.ClassName])));
@@ -198,8 +198,8 @@ class function TNidus.UseListener(const AListener: TListener): TNidus;
 begin
   if not Assigned(AListener) then
     Exit;
-  GAppInjector^.AddInstance<TAppListener>(TAppListener.Create(AListener));
-  FListener := GAppInjector^.Get<TAppListener>;
+  GNidusInject^.AddInstance<TAppListener>(TAppListener.Create(AListener));
+  FListener := GNidusInject^.Get<TAppListener>;
 end;
 
 function TNidus.UsePipes(const AValidationPipe: IValidationPipe): TNidus;
@@ -280,7 +280,7 @@ procedure TNidus.Finalize;
 begin
   // Do not change the order.
   FAppModule.Free;
-  FAppInjector^.ExtractInjector<TAppInjector>(C_NEST4D);
+  FNidusInject^.ExtractInject<TNidusInject>(C_NIDUS);
 end;
 
 procedure TNidus._ResolveDisposeRouteModule(const APath: String);
@@ -301,9 +301,4 @@ begin
 end;
 
 end.
-
-
-
-
-
 

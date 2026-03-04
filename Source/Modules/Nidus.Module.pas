@@ -29,7 +29,7 @@ uses
   Nidus.Route,
   Nidus.Route.Handler,
   Nidus.Bind,
-  Nidus.Injector,
+  Nidus.Inject,
   Nidus.Request,
   Nidus.Listener;
 
@@ -51,7 +51,7 @@ type
 
   TModule = class(TModuleAbstract)
   private
-    FAppInjector: PAppInjector;
+    FNidusInject: PNidusInject;
     FRouteHandlers: TObjectList<TRouteHandler>;
     FService: TModuleService;
     procedure _DestroyRoutes;
@@ -69,7 +69,7 @@ type
     function RouteHandlers: TRouteHandlers; override;
   end;
 
-  // S? para facilitar a sintaxe nos m?dulos
+  // Só para facilitar a sintaxe nos m?dulos
   Bind<T: class, constructor> = class(TBind<T>)
   end;
 
@@ -118,11 +118,11 @@ end;
 
 constructor TModule.Create;
 begin
-  FAppInjector := GAppInjector;
-  if not Assigned(FAppInjector) then
+  FNidusInject := GNidusInject;
+  if not Assigned(FNidusInject) then
     raise EAppInjector.Create;
   // Service inject
-  FService := FAppInjector^.Get<TModuleService>;
+  FService := FNidusInject^.Get<TModuleService>;
   // Routehandler list
   FRouteHandlers := TObjectList<TRouteHandler>.Create;
   // Load binds
@@ -135,7 +135,7 @@ end;
 
 destructor TModule.Destroy;
 begin
-  FAppInjector := nil;
+  FNidusInject := nil;
   // Destroy as rotas do modulo
   _DestroyRoutes;
   // Destroy o injector do modulo
@@ -185,7 +185,7 @@ end;
 
 procedure TModule._DestroyInjector;
 begin
-  FService.ExtractInjector<TAppInjector>(Self.ClassName);
+  FService.ExtractInject<TNidusInject>(Self.ClassName);
 end;
 
 procedure TModule._DestroyRoutes;
@@ -198,7 +198,7 @@ var
   LHandler: TClass;
   LObjectEx: TModernObject;
 begin
-  LObjectEx := FAppInjector^.Get<TModernObject>;
+  LObjectEx := FNidusInject^.Get<TModernObject>;
   if not Assigned(LObjectEx) then
     Exit;
   for LHandler in RouteHandlers do
@@ -206,11 +206,3 @@ begin
 end;
 
 end.
-
-
-
-
-
-
-
-

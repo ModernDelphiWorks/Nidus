@@ -25,12 +25,12 @@ uses
   Nidus.Module.Abstract,
   Nidus.Route.Abstract,
   Nidus.Listener,
-  Nidus.Injector;
+  Nidus.Inject;
 
 type
   TModuleProvider = class
   private
-    FAppInjector: PAppInjector;
+    FNidusInject: PNidusInject;
     FTracker: TTracker;
     FListener: TAppListener;
   public
@@ -43,7 +43,7 @@ type
     procedure AddRoutes(const AModule: TModuleAbstract);
     procedure BindModule(const AModule: TModuleAbstract);
     procedure RemoveRoutes(const AModuleName: String);
-    procedure ExtractInjector<T: class>(const ATag: String);
+    procedure ExtractInject<T: class>(const ATag: String);
   end;
 
 implementation
@@ -60,14 +60,14 @@ end;
 
 constructor TModuleProvider.Create;
 begin
-  FAppInjector := GAppInjector;
-  if not Assigned(FAppInjector) then
+  FNidusInject := GNidusInject;
+  if not Assigned(FNidusInject) then
     raise EAppInjector.Create;
 end;
 
 destructor TModuleProvider.Destroy;
 begin
-  FAppInjector := nil;
+  FNidusInject := nil;
   FTracker := nil;
   inherited;
 end;
@@ -88,7 +88,7 @@ function TModuleProvider.Start(const AModule: TModuleAbstract;
 begin
   try
     FTracker.RunApp(AModule, AInitialRoutePath);
-    FListener := FAppInjector^.Get<TAppListener>;
+    FListener := FNidusInject^.Get<TAppListener>;
     Result.Success(True);
   except
     on E: Exception do
@@ -107,7 +107,7 @@ begin
     LRoute := FTracker.DisposeModule(TRouteParam.Create(APath));
     if LRoute = nil then
     begin
-      LError := Format('Nest4d route (%s) not found!', [APath]);
+      LError := Format('Nidus route (%s) not found!', [APath]);
       Result.Failure(LError);
       Exit;
     end;
@@ -123,9 +123,9 @@ begin
   end;
 end;
 
-procedure TModuleProvider.ExtractInjector<T>(const ATag: String);
+procedure TModuleProvider.ExtractInject<T>(const ATag: String);
 begin
-  FTracker.ExtractInjector<T>(ATag);
+  FTracker.ExtractInject<T>(ATag);
 end;
 
 end.

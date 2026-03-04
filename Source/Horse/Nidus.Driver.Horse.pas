@@ -33,8 +33,8 @@ uses
   Nidus.Validation.Interfaces;
 
 function _ResolverRouteRequest(const Req: THorseRequest): IRouteRequest;
-function Nest4D_Horse(const AppModule: TModule): THorseCallback; overload;
-function Nest4D_Horse(const ACharset: String): THorseCallback; overload;
+function Nidus_Horse(const AAppModule: TModule): THorseCallback; overload;
+function Nidus_Horse(const ACharset: String): THorseCallback; overload;
 procedure Middleware(Req: THorseRequest; Res: THorseResponse; Next: TNextProc);
 
 implementation
@@ -42,13 +42,13 @@ implementation
 const
   C_AUTHORIZATION = 'Authorization';
 
-function Nest4D_Horse(const AppModule: TModule): THorseCallback;
+function Nidus_Horse(const AAppModule: TModule): THorseCallback;
 begin
-  GetNidus.Start(AppModule);
-  Result := Nest4D_Horse('UTF-8');
+  GetNidus.Start(AAppModule);
+  Result := Nidus_Horse('UTF-8');
 end;
 
-function Nest4D_Horse(const ACharset: String): THorseCallback;
+function Nidus_Horse(const ACharset: String): THorseCallback;
 begin
   Result := Middleware;
 end;
@@ -77,9 +77,9 @@ begin
       end,
       procedure (Error: Exception)
       begin
-        if Error is ENest4dException then
+        if Error is ENidusException then
         begin
-          Res.Send(Error.Message).Status(ENest4dException(Error)
+          Res.Send(Error.Message).Status(ENidusException(Error)
                                  .Status).ContentType(C_CONTENT_TYPE);
           Error.Free;
           raise EHorseCallbackInterrupted.Create;

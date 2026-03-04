@@ -37,7 +37,7 @@ type
     procedure AddRoutes(const AModule: TModuleAbstract);
     procedure BindModule(const AModule: TModuleAbstract);
     procedure RemoveRoutes(const AModuleName: String);
-    procedure ExtractInjector<T: class>(const ATag: String);
+    procedure ExtractInject<T: class>(const ATag: String);
   end;
 
 implementation
@@ -52,9 +52,9 @@ begin
   LResult := FProvider.DisposeModule(APath);
 end;
 
-procedure TModuleService.ExtractInjector<T>(const ATag: String);
+procedure TModuleService.ExtractInject<T>(const ATag: String);
 begin
-  FProvider.ExtractInjector<T>(ATag);
+  FProvider.ExtractInject<T>(ATag);
 end;
 
 procedure TModuleService.AddRoutes(const AModule: TModuleAbstract);

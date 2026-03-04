@@ -19,12 +19,12 @@ interface
 uses
   Rtti,
   SysUtils,
-  Nidus.Injector;
+  Nidus.Inject;
 
 type
   TRouteHandler = class abstract
   private
-    FAppInjector: PAppInjector;
+    FNidusInject: PNidusInject;
     procedure _RegisterRouteHandle(const ARoute: String);
   protected
     procedure RegisterRoutes; virtual; abstract;
@@ -48,15 +48,15 @@ uses
 
 constructor TRouteHandler.Create;
 begin
-  FAppInjector := GAppInjector;
-  if not Assigned(FAppInjector) then
+  FNidusInject := GNidusInject;
+  if not Assigned(FNidusInject) then
     raise EAppInjector.Create;
   RegisterRoutes;
 end;
 
 destructor TRouteHandler.Destroy;
 begin
-  FAppInjector := nil;
+  FNidusInject := nil;
   inherited;
 end;
 
@@ -94,7 +94,7 @@ procedure TRouteHandler._RegisterRouteHandle(const ARoute: String);
 var
   LRegister: TRegister;
 begin
-  LRegister := FAppInjector^.Get<TRegister>;
+  LRegister := FNidusInject^.Get<TRegister>;
   if LRegister = nil then
     Exit;
   if not LRegister.ResgisterContainsKey(Self.ClassName) then
@@ -105,11 +105,5 @@ begin
 end;
 
 end.
-
-
-
-
-
-
 
 

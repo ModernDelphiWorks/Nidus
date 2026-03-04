@@ -23,7 +23,7 @@ uses
   SysUtils;
 
 type
-  ENest4dException = class;
+  ENidusException = class;
   EBadRequestException = class;
   EUnauthorizedException = class;
   ERouteNotFoundException = class;
@@ -32,14 +32,14 @@ type
   EModuleStartedException = class;
   EModuleStartedInitException = class;
 
-  ENest4dException = class abstract (Exception)
+  ENidusException = class abstract (Exception)
   public
     Status: integer;
     constructor Create(const Msg: String); overload; virtual;
     constructor CreateFmt(const Msg: String; const Args: array of const); virtual;
   end;
 
-  EBadRequestException = class(ENest4dException)
+  EBadRequestException = class(ENidusException)
   public
     const cMSG_DEFAULT = 'Internal server error';
     const cMSG_DEFAULT_ARGS = 'Internal server error (%s)';
@@ -47,15 +47,15 @@ type
     constructor CreateFmt(const Msg: String; const Args: array of const); override;
   end;
 
-  ERouteNotFoundException = class(ENest4dException)
+  ERouteNotFoundException = class(ENidusException)
   public
-    const cMSG_DEFAULT = 'Nest4d route not found';
-    const cMSG_DEFAULT_ARGS = 'Nest4d route (%s) not found';
+    const cMSG_DEFAULT = 'Nidus route not found';
+    const cMSG_DEFAULT_ARGS = 'Nidus route (%s) not found';
     constructor Create(const Msg: String); overload; override;
     constructor CreateFmt(const Msg: String; const Args: array of const); override;
   end;
 
-  EBindException = class(ENest4dException)
+  EBindException = class(ENidusException)
   public
     const cMSG_DEFAULT = 'Class error occurred';
     const cMSG_DEFAULT_ARGS = 'Class [%s] error occurred';
@@ -63,7 +63,7 @@ type
     constructor CreateFmt(const Msg: String; const Args: array of const); override;
   end;
 
-  EUnauthorizedException = class(ENest4dException)
+  EUnauthorizedException = class(ENidusException)
   public
     const cMSG_DEFAULT = 'Access to route unauthorized';
     const cMSG_DEFAULT_ARGS = 'Access to route (%s) unauthorized';
@@ -71,7 +71,7 @@ type
     constructor CreateFmt(const Msg: String; const Args: array of const); override;
   end;
 
-  EBindNotFoundException = class(ENest4dException)
+  EBindNotFoundException = class(ENidusException)
   public
     const cMSG_DEFAULT = 'Class not found';
     const cMSG_DEFAULT_ARGS = 'Class [%s] not found';
@@ -79,7 +79,7 @@ type
     constructor CreateFmt(const Msg: String; const Args: array of const); override;
   end;
 
-  EModuleStartedException = class(ENest4dException)
+  EModuleStartedException = class(ENidusException)
   public
     const cMSG_DEFAULT = 'Module is already started';
     const cMSG_DEFAULT_ARGS = 'Module [%s] is already started';
@@ -87,7 +87,7 @@ type
     constructor CreateFmt(const Msg: String; const Args: array of const); override;
   end;
 
-  EModuleStartedInitException = class(ENest4dException)
+  EModuleStartedInitException = class(ENidusException)
   public
     const cMSG_DEFAULT = 'Execute "Nest.Init(TAppModule.Create)" this is just an example';
     const cMSG_DEFAULT_ARGS = 'Execute "Nest.Init(%s)" this is just an example';
@@ -119,14 +119,14 @@ begin
   TThread.Queue(nil,
           procedure
           begin
-            OutputDebugString(PWideChar('[Nest4D] - ' + FormatDateTime('mm/dd/yyyy, hh:mm:ss AM/PM', Now) + ' LOG ' + AMessage));
+            OutputDebugString(PWideChar('[Nidus] - ' + FormatDateTime('mm/dd/yyyy, hh:mm:ss AM/PM', Now) + ' LOG ' + AMessage));
           end);
 end;
 {$ENDIF}
 
 function FormatListenerMessage(const AMessage: String): String;
 begin
-  Result := '[Nest4D] - ' + FormatDateTime('mm/dd/yyyy, hh:mm:ss AM/PM', Now) + ' LOG ' + AMessage;
+  Result := '[Nidus] - ' + FormatDateTime('mm/dd/yyyy, hh:mm:ss AM/PM', Now) + ' LOG ' + AMessage;
 end;
 
 { ERouteNotFound }
@@ -230,13 +230,13 @@ end;
 
 { EModularError }
 
-constructor ENest4dException.Create(const Msg: String);
+constructor ENidusException.Create(const Msg: String);
 begin
   inherited Create(Msg);
   Status := 0;
 end;
 
-constructor ENest4dException.CreateFmt(const Msg: String;
+constructor ENidusException.CreateFmt(const Msg: String;
   const Args: array of const);
 begin
   inherited CreateFmt(Msg, Args);

@@ -12,7 +12,7 @@
   ------------------------------------------------------------------------------
 }
 
-unit Nidus.Injector;
+unit Nidus.Inject;
 
 interface
 
@@ -24,14 +24,14 @@ uses
   Generics.Collections;
 
 type
-  PAppInjector = ^TAppInjector;
-  TAppInjector = class(TInject)
+  PNidusInject = ^TNidusInject;
+  TNidusInject = class(TInject)
   public
-    procedure CreateNest4dInjector;
-    procedure ExtractInjector<T: class>(const ATag: String = '');
+    procedure CreateNidusdInject;
+    procedure ExtractInject<T: class>(const ATag: String = '');
   end;
 
-  TCoreInjector = class(TAppInjector)
+  TCoreInject = class(TNidusInject)
   private
     procedure _TrackeInjector; // Singleton
     procedure _ObjectFactoryInjector; // SingletonLazy
@@ -42,15 +42,15 @@ type
     procedure _BindProviderInjector; // Factory
     procedure _RouteProviderInjector; // Factory
     procedure _RouteParseInjector; // Factory
-    procedure _Nest4dBrInjector; // SingletonLazy
+    procedure _NidusInject; // SingletonLazy
   public
     constructor Create; override;
   end;
 
 var
-  GAppInjector: PAppInjector = nil;
+  GNidusInject: PNidusInject = nil;
 
-const C_NEST4D = 'Nest4D';
+const C_NIDUS = 'Nidus';
 
 implementation
 
@@ -70,7 +70,7 @@ uses
 
 { TCoreInjector }
 
-constructor TCoreInjector.Create;
+constructor TCoreInject.Create;
 begin
   inherited;
   // Datasource
@@ -85,10 +85,10 @@ begin
   _BindProviderInjector;
   _RouteProviderInjector;
   _RouteParseInjector;
-  _Nest4dBrInjector;
+  _NidusInject;
 end;
 
-procedure TCoreInjector._BindProviderInjector;
+procedure TCoreInject._BindProviderInjector;
 begin
   Self.Factory<TBindProvider>(nil, nil,
     function: TConstructorParams
@@ -97,7 +97,7 @@ begin
     end);
 end;
 
-procedure TCoreInjector._BindServiceInjector;
+procedure TCoreInject._BindServiceInjector;
 begin
   Self.Factory<TBindService>(
     procedure(Value: TBindService)
@@ -106,7 +106,7 @@ begin
     end);
 end;
 
-procedure TCoreInjector._Nest4dBrInjector;
+procedure TCoreInject._NidusInject;
 begin
   Self.SingletonLazy<TNidus>(
     procedure(Value: TNidus)
@@ -117,7 +117,7 @@ begin
     end);
 end;
 
-procedure TCoreInjector._ModuleProviderInjector;
+procedure TCoreInject._ModuleProviderInjector;
 begin
   Self.Factory<TModuleProvider>(
     procedure(Value: TModuleProvider)
@@ -126,7 +126,7 @@ begin
     end);
 end;
 
-procedure TCoreInjector._ModuleServiceInjector;
+procedure TCoreInject._ModuleServiceInjector;
 begin
   Self.Factory<TModuleService>(
     procedure(Value: TModuleService)
@@ -135,7 +135,7 @@ begin
     end);
 end;
 
-procedure TCoreInjector._RouteParseInjector;
+procedure TCoreInject._RouteParseInjector;
 begin
   Self.Factory<TRouteParse>(
     procedure(Value: TRouteParse)
@@ -144,7 +144,7 @@ begin
     end);
 end;
 
-procedure TCoreInjector._RouteProviderInjector;
+procedure TCoreInject._RouteProviderInjector;
 begin
   Self.Factory<TRouteProvider>(
     procedure(Value: TRouteProvider)
@@ -153,7 +153,7 @@ begin
     end);
 end;
 
-procedure TCoreInjector._RouteServiceInjector;
+procedure TCoreInject._RouteServiceInjector;
 begin
   Self.Factory<TRouteService>(
     procedure(Value: TRouteService)
@@ -162,24 +162,24 @@ begin
     end);
 end;
 
-procedure TCoreInjector._TrackeInjector;
+procedure TCoreInject._TrackeInjector;
 begin
   Self.SingletonLazy<TTracker>;
   Self.SingletonLazy<TRouteManager>;
 end;
 
-procedure TCoreInjector._ObjectFactoryInjector;
+procedure TCoreInject._ObjectFactoryInjector;
 begin
   Self.Singleton<TModernObject>;
 end;
 
-procedure TAppInjector.CreateNest4dInjector;
+procedure TNidusInject.CreateNidusdInject;
 begin
-  GAppInjector^.AddInjector(C_NEST4D, TCoreInjector.Create);
-  GAppInjector^.AddInstance<TRegister>(TRegister.Create);
+  GNidusInject^.AddInject(C_NIDUS, TCoreInject.Create);
+  GNidusInject^.AddInstance<TRegister>(TRegister.Create);
 end;
 
-procedure TAppInjector.ExtractInjector<T>(const ATag: String);
+procedure TNidusInject.ExtractInject<T>(const ATag: String);
 var
   LKey: String;
 begin
@@ -190,25 +190,17 @@ begin
 end;
 
 initialization
-  New(GAppInjector);
-  GAppInjector^ := TAppInjector.Create;
-  GAppInjector^.CreateNest4dInjector;
+  New(GNidusInject);
+  GNidusInject^ := TNidusInject.Create;
+  GNidusInject^.CreateNidusdInject;
 
 finalization
-  if Assigned(GAppInjector) then
+  if Assigned(GNidusInject) then
   begin
     GetNidus.Finalize;
-    GAppInjector^.Free;
-    Dispose(GAppInjector);
+    GNidusInject^.Free;
+    Dispose(GNidusInject);
   end;
 
 end.
-
-
-
-
-
-
-
-
 

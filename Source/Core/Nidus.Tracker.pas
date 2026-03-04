@@ -30,7 +30,7 @@ uses
   Nidus.Route.Abstract,
   Nidus.Route.Manager,
   Nidus.Bind,
-  Nidus.Injector,
+  Nidus.Inject,
   Nidus.Request;
 
 type
@@ -38,7 +38,7 @@ type
 
   TTracker = class
   private
-    FAppInjector: PAppInjector;
+    FNidusInject: PNidusInject;
     FAppModule: TModuleAbstract;
     FRoutes: TTrackerRoute;
     FAppIntialPath: String;
@@ -47,15 +47,15 @@ type
     FRequest: IRouteRequest;
     FObjectEx: TModernObject;
     procedure _AddModuleBinds(const AModule: TModuleAbstract;
-      const AInjector: TAppInjector);
+      const AInjector: TNidusInject);
     procedure _AddExportedModuleBinds(const AModule: TModuleAbstract;
-      const AInjector: TAppInjector);
+      const AInjector: TNidusInject);
     procedure _AddModuleImportsBind(const AModule: TModuleAbstract;
-      const AInjector: TAppInjector);
+      const AInjector: TNidusInject);
     procedure _AddRoute(const ARoute: TRouteAbstract; const AParent: String);
     procedure _ResolverImports(const AModule: TClass;
-      const AInjector: TAppInjector);
-    function _CreateInjector: TAppInjector;
+      const AInjector: TNidusInject);
+    function _CreateInjector: TNidusInject;
     function _CreateModule(const AModule: TClass): TModuleAbstract;
     procedure _GuardianRoute(const ARoute: TRouteAbstract);
     function _RouteMiddlewares(const ARoute: TRouteAbstract): TRouteAbstract;
@@ -67,7 +67,7 @@ type
     procedure BindModule(const AModule: TModuleAbstract);
     procedure RemoveRoutes(const AModuleName: String);
     procedure AddRoutes(const AModule: TModuleAbstract);
-    procedure ExtractInjector<T: class>(const ATag: String);
+    procedure ExtractInject<T: class>(const ATag: String);
     function GetBind<T: class, constructor>(const ATag: String): T;
     function GetBindInterface<I: IInterface>(const ATag: String): I;
     function FindRoute(const AArgs: TRouteParam): TRouteAbstract;
@@ -86,16 +86,16 @@ uses
 constructor TTracker.Create;
 begin
   FRoutes := TTrackerRoute.Create([doOwnsValues]);
-  FAppInjector := GAppInjector;
-  if not Assigned(FAppInjector) then
+  FNidusInject := GNidusInject;
+  if not Assigned(FNidusInject) then
     raise EAppInjector.Create;
-  FRouteManager := FAppInjector^.Get<TRouteManager>;
-  FObjectEx := FAppInjector^.Get<TModernObject>
+  FRouteManager := FNidusInject^.Get<TRouteManager>;
+  FObjectEx := FNidusInject^.Get<TModernObject>
 end;
 
 destructor TTracker.Destroy;
 begin
-  FAppInjector := nil;
+  FNidusInject := nil;
   FRouteManager := nil;
   FAppModule := nil;
   FObjectEx := nil;
@@ -121,13 +121,13 @@ begin
   end;
 end;
 
-procedure TTracker.ExtractInjector<T>(const ATag: String);
+procedure TTracker.ExtractInject<T>(const ATag: String);
 begin
-  FAppInjector^.ExtractInjector<T>(ATag);
+  FNidusInject^.ExtractInject<T>(ATag);
 end;
 
 procedure TTracker._AddModuleBinds(const AModule: TModuleAbstract;
-  const AInjector: TAppInjector);
+  const AInjector: TNidusInject);
 var
   LBind: TBind<TObject>;
 begin
@@ -139,7 +139,7 @@ begin
 end;
 
 procedure TTracker._AddExportedModuleBinds(const AModule: TModuleAbstract;
-  const AInjector: TAppInjector);
+  const AInjector: TNidusInject);
 var
   LBind: TBind<TObject>;
   LExportedBinds: TExportedBinds;
@@ -155,7 +155,7 @@ begin
 end;
 
 procedure TTracker._AddModuleImportsBind(const AModule: TModuleAbstract;
-  const AInjector: TAppInjector);
+  const AInjector: TNidusInject);
 var
   LModule: TClass;
 begin
@@ -176,9 +176,9 @@ begin
   FRouteManager.EndPoints.Sort;
 end;
 
-function TTracker._CreateInjector: TAppInjector;
+function TTracker._CreateInjector: TNidusInject;
 begin
-  Result := TAppInjector.Create;
+  Result := TNidusInject.Create;
 end;
 
 function TTracker._CreateModule(const AModule: TClass): TModuleAbstract;
@@ -217,15 +217,16 @@ end;
 
 procedure TTracker.BindModule(const AModule: TModuleAbstract);
 var
-  LInjector: TAppInjector;
+  LInjector: TNidusInject;
   LModule: TClass;
 begin
-  // O Bind dos m?dulos s?o efetuados por rota, se v?rias rotas usarem o mesmo
-  // m?dulo, deve gerar somente um injector para o m?dulo, independente de
+  // O Bind dos módulos são efetuados por rota, se várias rotas usarem o mesmo
+  // módulo, deve gerar somente um injector para o módulo, independente de
   // quantas rotas chama-lo.
-  LInjector := FAppInjector^.Get<TAppInjector>(AModule.ClassName);
+  LInjector := FNidusInject^.Get<TNidusInject>(AModule.ClassName);
   if LInjector <> nil then
     Exit;
+
   // Injector do Modulo
   LInjector := _CreateInjector;
   _AddModuleBinds(AModule, LInjector);
@@ -235,7 +236,7 @@ begin
       _ResolverImports(LModule, LInjector);
   end;
   // Adiciona ao AppInjector
-  FAppInjector^.AddInjector(AModule.ClassName, LInjector);
+  FNidusInject^.AddInject(AModule.ClassName, LInjector);
 end;
 
 function TTracker.CurrentPath: String;
@@ -268,12 +269,12 @@ end;
 
 function TTracker.GetBind<T>(const ATag: String): T;
 begin
-  Result := FAppInjector^.Get<T>(ATag);
+  Result := FNidusInject^.Get<T>(ATag);
 end;
 
 function TTracker.GetBindInterface<I>(const ATag: String): I;
 begin
-  Result := FAppInjector^.GetInterface<I>(ATag);
+  Result := FNidusInject^.GetInterface<I>(ATag);
 end;
 
 function TTracker.GetModule: TModuleAbstract;
@@ -313,7 +314,7 @@ begin
 end;
 
 procedure TTracker._ResolverImports(const AModule: TClass;
-  const AInjector: TAppInjector);
+  const AInjector: TNidusInject);
 var
   LInstance: TModuleAbstract;
 begin
