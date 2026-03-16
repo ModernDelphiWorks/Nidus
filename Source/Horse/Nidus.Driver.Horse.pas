@@ -63,7 +63,8 @@ begin
   // Treatment to ignore Swagger documentation routes in this middleware.
   if (Pos(LowerCase('swagger'), LowerCase(Req.RawWebRequest.PathInfo)) > 0) or
      (Pos(LowerCase('favicon.ico'), LowerCase(Req.RawWebRequest.PathInfo)) > 0) then
-    exit;
+    Exit;
+
   // Route initialization and bindings.
   if (Req.MethodType in [mtGet, mtPost, mtPut, mtPatch, mtDelete]) then
   begin

@@ -42,13 +42,13 @@ type
     FNidusInject: PNidusInject;
     FService: TRouteService;
     FRouteManager: TRouteManager;
-    procedure _ResolveRoutes(const APath: String;
-      const ACallback: TFunc<String, TReturnPair>);
+    procedure _ResolveRoutes(const APath: string;
+      const ACallback: TFunc<string, TReturnPair>);
   public
     constructor Create;
     destructor Destroy; override;
     procedure IncludeRouteService(const AService: TRouteService);
-    function SelectRoute(const APath: String;
+    function SelectRoute(const APath: string;
       const AReq: IRouteRequest = nil): TReturnPair;
   end;
 
@@ -126,11 +126,11 @@ begin
   Result := LRouteResult;
 end;
 
-procedure TRouteParse._ResolveRoutes(const APath: String;
-  const ACallback: TFunc<String, TReturnPair>);
+procedure TRouteParse._ResolveRoutes(const APath: string;
+  const ACallback: TFunc<string, TReturnPair>);
 var
   LRoutes: TStringDynArray;
-  LRoute: String;
+  LRoute: string;
   LResult: TReturnPair;
 begin
   LRoutes := SplitString(APath, '/');

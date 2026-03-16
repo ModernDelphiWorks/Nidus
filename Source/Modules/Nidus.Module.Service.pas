@@ -32,12 +32,12 @@ type
     destructor Destroy; override;
     procedure IncludeProvider(const AProvider: TModuleProvider);
     procedure Start(const AModule: TModuleAbstract;
-      const AInitialRoutePath: String);
-    procedure DisposeModule(const APath: String);
+      const AInitialRoutePath: string);
+    procedure DisposeModule(const APath: string);
     procedure AddRoutes(const AModule: TModuleAbstract);
     procedure BindModule(const AModule: TModuleAbstract);
-    procedure RemoveRoutes(const AModuleName: String);
-    procedure ExtractInject<T: class>(const ATag: String);
+    procedure RemoveRoutes(const AModuleName: string);
+    procedure ExtractInject<T: class>(const ATag: string);
   end;
 
 implementation
@@ -45,14 +45,14 @@ implementation
 { TModuleService }
 
 procedure TModuleService.DisposeModule(
-  const APath: String);
+  const APath: string);
 var
-  LResult: TResultPair<Boolean, String>;
+  LResult: TResultPair<Boolean, string>;
 begin
   LResult := FProvider.DisposeModule(APath);
 end;
 
-procedure TModuleService.ExtractInject<T>(const ATag: String);
+procedure TModuleService.ExtractInject<T>(const ATag: string);
 begin
   FProvider.ExtractInject<T>(ATag);
 end;
@@ -79,26 +79,18 @@ begin
   FProvider := AProvider;
 end;
 
-procedure TModuleService.RemoveRoutes(const AModuleName: String);
+procedure TModuleService.RemoveRoutes(const AModuleName: string);
 begin
   FProvider.RemoveRoutes(AModuleName);
 end;
 
 procedure TModuleService.Start(const AModule: TModuleAbstract;
-  const AInitialRoutePath: String);
+  const AInitialRoutePath: string);
 var
-  LResult: TResultPair<Boolean, String>;
+  LResult: TResultPair<Boolean, string>;
 begin
   LResult := FProvider.Start(AModule, AInitialRoutePath);
 end;
 
 end.
-
-
-
-
-
-
-
-
 

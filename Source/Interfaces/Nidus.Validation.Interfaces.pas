@@ -23,15 +23,15 @@ uses
   ModernSyntax.ResultPair;
 
 type
-  TResultValidation = TResultPair<Boolean, String>;
+  TResultValidation = TResultPair<Boolean, string>;
 
   IValidationArguments = interface
     ['{008AE8DA-AA34-4881-9477-617A0CD9B158}']
-    function TagName: String;
-    function FieldName: String;
+    function TagName: string;
+    function FieldName: string;
     function Values: TArray<TValue>;
-    function Message: String;
-    function TypeName: String;
+    function Message: string;
+    function TypeName: string;
     function ObjectType: TClass;
   end;
 

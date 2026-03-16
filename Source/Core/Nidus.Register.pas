@@ -49,8 +49,8 @@ implementation
 
 constructor TRegister.Create;
 begin
-  FRegisters := TDictionary<String, TRouteHandlerClass>.Create;
-  FRoutes := TDictionary<String, String>.Create;
+  FRegisters := TDictionary<string, TRouteHandlerClass>.Create;
+  FRoutes := TDictionary<string, string>.Create;
 end;
 
 destructor TRegister.Destroy;
@@ -59,13 +59,13 @@ begin
   FRegisters.Free;
 end;
 
-function TRegister.FindRecord(const AKey: String): TRouteHandlerClass;
+function TRegister.FindRecord(const AKey: string): TRouteHandlerClass;
 begin
   Result := nil;
   if not FRoutes.ContainsKey(AKey) then
-    exit;
+    Exit;
   if not FRegisters.ContainsKey(FRoutes[AKey]) then
-    exit;
+    Exit;
   Result := FRegisters[FRoutes[AKey]];
 end;
 
@@ -80,7 +80,7 @@ begin
     FRegisters.Add(AClass.ClassName, AClass);
 end;
 
-procedure TRegister.Add(const AKey: String; const ARouteHandleName: String);
+procedure TRegister.Add(const AKey: string; const ARouteHandleName: string);
 begin
   if not FRoutes.ContainsKey(AKey) then
     FRoutes.Add(AKey, ARouteHandleName);
@@ -107,12 +107,4 @@ begin
 end;
 
 end.
-
-
-
-
-
-
-
-
 

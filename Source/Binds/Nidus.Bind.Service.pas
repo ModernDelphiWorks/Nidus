@@ -18,6 +18,7 @@ interface
 
 uses
   SysUtils,
+  TypInfo,
   ModernSyntax.ResultPair,
   Nidus.Bind.Provider;
 
@@ -28,8 +29,8 @@ type
   public
     destructor Destroy; override;
     procedure IncludeBindProvider(const AProvider: TBindProvider);
-    function GetBind<T: class, constructor>(const ATag: String): TResultPair<T, Exception>;
-    function GetBindInterface<I: IInterface>(const ATag: String): TResultPair<I, Exception>;
+    function GetBind<T: class, constructor>(const ATag: string): TResultPair<T, Exception>;
+    function GetBindInterface<I: IInterface>(const ATag: string): TResultPair<I, Exception>;
   end;
 
 implementation
@@ -46,24 +47,68 @@ begin
   inherited;
 end;
 
+//function TBindService.GetBindInterface<I>(const ATag: string): TResultPair<I, Exception>;
+//begin
+//  try
+//    Result := FProvider.GetBindInterface<I>(ATag);
+//    if Result.ValueSuccess = nil then
+//      Result.Failure(EBindNotFoundException.Create(''));
+//  except
+//    on E: Exception do
+//      Result.Failure(EBindException.Create(E.Message));
+//  end;
+//end;
+
 function TBindService.GetBindInterface<I>(const ATag: String): TResultPair<I, Exception>;
+var
+  LTypeName: String;
+  LMsg: String;
 begin
   try
     Result := FProvider.GetBindInterface<I>(ATag);
     if Result.ValueSuccess = nil then
-      Result.Failure(EBindNotFoundException.Create(''));
+    begin
+      LTypeName := GetTypeName(TypeInfo(I));
+      LMsg := Format(
+        '{"statusCode":"404","message":"Interface not found","error":"Not Found","bindType":"%s","tag":"%s"}',
+        [LTypeName, ATag]
+      );
+      Result.Failure(EBindNotFoundException.Create(LMsg));
+    end;
   except
     on E: Exception do
       Result.Failure(EBindException.Create(E.Message));
   end;
 end;
 
-function TBindService.GetBind<T>(const ATag: String): TResultPair<T, Exception>;
+//function TBindService.GetBind<T>(const ATag: string): TResultPair<T, Exception>;
+//begin
+//  try
+//    Result := FProvider.GetBind<T>(ATag);
+//    if Result.ValueSuccess = nil then
+//      Result.Failure(EBindNotFoundException.Create(''));
+//  except
+//    on E: Exception do
+//      Result.Failure(EBindException.Create(E.Message));
+//  end;
+//end;
+
+function TBindService.GetBind<T>(const ATag: string): TResultPair<T, Exception>;
+var
+  LTypeName: string;
+  LMsg: string;
 begin
   try
     Result := FProvider.GetBind<T>(ATag);
     if Result.ValueSuccess = nil then
-      Result.Failure(EBindNotFoundException.Create(''));
+    begin
+      LTypeName := T.ClassName;
+      LMsg := Format(
+        '{"statusCode":"404","message":"Class not found","error":"Not Found","bindType":"%s","tag":"%s"}',
+        [LTypeName, ATag]
+      );
+      Result.Failure(EBindNotFoundException.Create(LMsg));
+    end;
   except
     on E: Exception do
       Result.Failure(EBindException.Create(E.Message));
@@ -76,16 +121,4 @@ begin
 end;
 
 end.
-
-
-
-
-
-
-
-
-
-
-
-
 

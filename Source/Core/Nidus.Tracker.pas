@@ -41,39 +41,39 @@ type
     FNidusInject: PNidusInject;
     FAppModule: TModuleAbstract;
     FRoutes: TTrackerRoute;
-    FAppIntialPath: String;
-    FCurrentPath: String;
+    FAppIntialPath: string;
+    FCurrentPath: string;
     FRouteManager: TRouteManager;
     FRequest: IRouteRequest;
-    FObjectEx: TModernObject;
+    FObject: TModernObject;
     procedure _AddModuleBinds(const AModule: TModuleAbstract;
-      const AInjector: TNidusInject);
+      const AInject: TNidusInject);
     procedure _AddExportedModuleBinds(const AModule: TModuleAbstract;
-      const AInjector: TNidusInject);
+      const AInject: TNidusInject);
     procedure _AddModuleImportsBind(const AModule: TModuleAbstract;
-      const AInjector: TNidusInject);
-    procedure _AddRoute(const ARoute: TRouteAbstract; const AParent: String);
+      const AInject: TNidusInject);
+    procedure _AddRoute(const ARoute: TRouteAbstract; const AParent: string);
     procedure _ResolverImports(const AModule: TClass;
-      const AInjector: TNidusInject);
+      const AInject: TNidusInject);
     function _CreateInjector: TNidusInject;
     function _CreateModule(const AModule: TClass): TModuleAbstract;
     procedure _GuardianRoute(const ARoute: TRouteAbstract);
     function _RouteMiddlewares(const ARoute: TRouteAbstract): TRouteAbstract;
-    procedure _RemoveEndPoint(const APath: String);
+    procedure _RemoveEndPoint(const APath: string);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure RunApp(const AModule: TModuleAbstract; const AIntialRoutePath: String);
+    procedure RunApp(const AModule: TModuleAbstract; const AIntialRoutePath: string);
     procedure BindModule(const AModule: TModuleAbstract);
-    procedure RemoveRoutes(const AModuleName: String);
+    procedure RemoveRoutes(const AModuleName: string);
     procedure AddRoutes(const AModule: TModuleAbstract);
-    procedure ExtractInject<T: class>(const ATag: String);
-    function GetBind<T: class, constructor>(const ATag: String): T;
-    function GetBindInterface<I: IInterface>(const ATag: String): I;
+    procedure ExtractInject<T: class>(const ATag: string);
+    function GetBind<T: class, constructor>(const ATag: string): T;
+    function GetBindInterface<I: IInterface>(const ATag: string): I;
     function FindRoute(const AArgs: TRouteParam): TRouteAbstract;
     function DisposeModule(const AArgs: TRouteParam): TRouteAbstract;
     function GetModule: TModuleAbstract;
-    function CurrentPath: String;
+    function CurrentPath: string;
   end;
 
 implementation
@@ -90,7 +90,7 @@ begin
   if not Assigned(FNidusInject) then
     raise EAppInjector.Create;
   FRouteManager := FNidusInject^.Get<TRouteManager>;
-  FObjectEx := FNidusInject^.Get<TModernObject>
+  FObject := FNidusInject^.Get<TModernObject>
 end;
 
 destructor TTracker.Destroy;
@@ -98,7 +98,7 @@ begin
   FNidusInject := nil;
   FRouteManager := nil;
   FAppModule := nil;
-  FObjectEx := nil;
+  FObject := nil;
   FRoutes.Free;
   inherited;
 end;
@@ -127,19 +127,19 @@ begin
 end;
 
 procedure TTracker._AddModuleBinds(const AModule: TModuleAbstract;
-  const AInjector: TNidusInject);
+  const AInject: TNidusInject);
 var
   LBind: TBind<TObject>;
 begin
   for LBind in AModule.Binds do
   begin
-    LBind.IncludeInjector(AInjector);
+    LBind.IncludeInject(AInject);
     LBind.Free;
   end;
 end;
 
 procedure TTracker._AddExportedModuleBinds(const AModule: TModuleAbstract;
-  const AInjector: TNidusInject);
+  const AInject: TNidusInject);
 var
   LBind: TBind<TObject>;
   LExportedBinds: TExportedBinds;
@@ -149,21 +149,21 @@ begin
     Exit;
   for LBind in LExportedBinds do
   begin
-    LBind.IncludeInjector(AInjector);
+    LBind.IncludeInject(AInject);
     LBind.Free;
   end;
 end;
 
 procedure TTracker._AddModuleImportsBind(const AModule: TModuleAbstract;
-  const AInjector: TNidusInject);
+  const AInject: TNidusInject);
 var
   LModule: TClass;
 begin
-  _AddExportedModuleBinds(AModule, AInjector);
+  _AddExportedModuleBinds(AModule, AInject);
   if Length(AModule.Imports) = 0 then
     Exit;
   for LModule in AModule.Imports do
-    _ResolverImports(LModule, AInjector);
+    _ResolverImports(LModule, AInject);
 end;
 
 procedure TTracker._AddRoute(const ARoute: TRouteAbstract; const AParent: String);
@@ -183,7 +183,7 @@ end;
 
 function TTracker._CreateModule(const AModule: TClass): TModuleAbstract;
 begin
-  Result := FObjectEx.Factory(AModule) as TModuleAbstract;
+  Result := FObject.Factory(AModule) as TModuleAbstract;
 end;
 
 procedure TTracker._GuardianRoute(const ARoute: TRouteAbstract);
@@ -229,6 +229,7 @@ begin
 
   // Injector do Modulo
   LInjector := _CreateInjector;
+  LInjector.Name := AModule.ClassName;
   _AddModuleBinds(AModule, LInjector);
   if Length(AModule.Imports) > 0 then
   begin
@@ -247,10 +248,10 @@ end;
 function TTracker.FindRoute(const AArgs: TRouteParam): TRouteAbstract;
 var
   LKey: TRouteKey;
-  LEndPoint: String;
+  LEndPoint: string;
   LRoute: TRouteAbstract;
 begin
-  // Request atualizada a cada requisi??o, para ser usada internamente
+  // Request atualizada a cada requisição, para ser usada internamente
   FRequest := AArgs.Request;
   Result := nil;
   LEndPoint := FRouteManager.FindEndpoint(AArgs.Path);
@@ -267,12 +268,12 @@ begin
   end;
 end;
 
-function TTracker.GetBind<T>(const ATag: String): T;
+function TTracker.GetBind<T>(const ATag: string): T;
 begin
   Result := FNidusInject^.Get<T>(ATag);
 end;
 
-function TTracker.GetBindInterface<I>(const ATag: String): I;
+function TTracker.GetBindInterface<I>(const ATag: string): I;
 begin
   Result := FNidusInject^.GetInterface<I>(ATag);
 end;
@@ -314,7 +315,7 @@ begin
 end;
 
 procedure TTracker._ResolverImports(const AModule: TClass;
-  const AInjector: TNidusInject);
+  const AInject: TNidusInject);
 var
   LInstance: TModuleAbstract;
 begin
@@ -322,7 +323,7 @@ begin
   if LInstance = nil then
     Exit;
   try
-    _AddModuleImportsBind(LInstance, AInjector);
+    _AddModuleImportsBind(LInstance, AInject);
   finally
     LInstance.Free;
   end;
@@ -342,10 +343,4 @@ begin
 end;
 
 end.
-
-
-
-
-
-
 

@@ -25,14 +25,14 @@ type
 
   TRouteModule = class(TRoute)
   public
-    class function AddModule(const APath: String;
+    class function AddModule(const APath: string;
       const AModule: TClass;
       const AMiddlewares: TMiddlewares): TRouteAbstract; override;
   end;
 
   TRouteChild = class(TRoute)
   public
-    class function AddModule(const APath: String;
+    class function AddModule(const APath: string;
       const AModule: TClass;
       const AMiddlewares: TMiddlewares): TRouteAbstract; override;
   end;
@@ -41,7 +41,7 @@ implementation
 
 { TRouteModule }
 
-class function TRouteModule.AddModule(const APath: String;
+class function TRouteModule.AddModule(const APath: string;
   const AModule: TClass;
   const AMiddlewares: TMiddlewares): TRouteAbstract;
 begin
@@ -54,7 +54,7 @@ end;
 
 { TRouteChild }
 
-class function TRouteChild.AddModule(const APath: String;
+class function TRouteChild.AddModule(const APath: string;
   const AModule: TClass;
   const AMiddlewares: TMiddlewares): TRouteAbstract;
 begin
@@ -63,10 +63,4 @@ begin
 end;
 
 end.
-
-
-
-
-
-
 

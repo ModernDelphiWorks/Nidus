@@ -28,7 +28,7 @@ type
   TNidusInject = class(TInject)
   public
     procedure CreateNidusdInject;
-    procedure ExtractInject<T: class>(const ATag: String = '');
+    procedure ExtractInject<T: class>(const ATag: string = '');
   end;
 
   TCoreInject = class(TNidusInject)

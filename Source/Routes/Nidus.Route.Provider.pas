@@ -35,7 +35,6 @@ type
   private
     FTracker: TTracker;
     FNidusInject: PNidusInject;
-    FObjectEx: TModernObject;
     function _RouteMiddleware(const ARoute: TRouteAbstract): TRouteAbstract;
   public
     constructor Create;
@@ -51,7 +50,6 @@ begin
   FNidusInject := GNidusInject;
   if not Assigned(FNidusInject) then
     raise EAppInjector.Create;
-  FObjectEx := FNidusInject^.Get<TModernObject>;
 end;
 
 destructor TRouteProvider.Destroy;
@@ -85,14 +83,18 @@ end;
 function TRouteProvider.GetRoute(const AArgs: TRouteParam): TResultPair<TRouteAbstract, Exception>;
 var
   LListener: TAppListener;
+  LObject: TModernObject;
 begin
   Result.Success(FTracker.FindRoute(AArgs));
   if Result.ValueSuccess = nil then
     Exit;
+  //
+  LObject := FNidusInject^.Get<TModernObject>;
+  LListener := FNidusInject^.Get<TAppListener>;
+  //
   if not Assigned(Result.ValueSuccess.ModuleInstance) then
   begin
-    Result.ValueSuccess.ModuleInstance := FObjectEx.Factory(Result.ValueSuccess.Module);
-    LListener := FNidusInject^.Get<TAppListener>;
+    Result.ValueSuccess.ModuleInstance := LObject.Factory(Result.ValueSuccess.Module);
     if Assigned(LListener) then
       LListener.Execute(FormatListenerMessage(Format('[InstanceLoader] %s dependencies initialized', [Result.ValueSuccess.ModuleInstance.ClassName])));
   end;
@@ -101,9 +103,4 @@ begin
 end;
 
 end.
-
-
-
-
-
 

@@ -23,15 +23,15 @@ uses
   ModernSyntax.ResultPair;
 
 type
-  TResultTransform = TResultPair<TValue, String>;
-  TJsonMapped = TObjectDictionary<String, TList<TValue>>;
+  TResultTransform = TResultPair<TValue, string>;
+  TJsonMapped = TObjectDictionary<string, TList<TValue>>;
 
   ITransformArguments = interface
     ['{C410FE53-25D6-42DD-8D61-AF04E97C1628}']
-    function TagName: String;
-    function FieldName: String;
+    function TagName: string;
+    function FieldName: string;
     function Values: TArray<TValue>;
-    function Message: String;
+    function Message: string;
     function ObjectType: TClass;
   end;
 

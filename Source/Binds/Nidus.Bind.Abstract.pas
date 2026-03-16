@@ -29,7 +29,7 @@ type
     FAddInstance: TObject;
   public
     destructor Destroy; override;
-    procedure IncludeInjector(const AInjector4d: TInject); virtual; abstract;
+    procedure IncludeInject(const ANidusInject: TInject); virtual; abstract;
   end;
 
 implementation

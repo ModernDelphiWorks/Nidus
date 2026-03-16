@@ -69,18 +69,18 @@ type
     function RouteHandlers: TRouteHandlers; override;
   end;
 
-  // Só para facilitar a sintaxe nos m?dulos
+  // Só para facilitar a sintaxe nos módulos
   Bind<T: class, constructor> = class(TBind<T>)
   end;
 
 // RouteModule
-function RouteModule(const APath: String;
+function RouteModule(const APath: string;
   const AModule: TModuleClass): TRouteModule; overload;
-function RouteModule(const APath: String; const AModule: TModuleClass;
+function RouteModule(const APath: string; const AModule: TModuleClass;
   const AMiddlewares: TMiddlewares): TRouteModule; overload;
 
 // RouteChild
-function RouteChild(const APath: String; const AModule: TModuleClass;
+function RouteChild(const APath: string; const AModule: TModuleClass;
   const AMiddlewares: TMiddlewares = []): TRouteChild;
 
 implementation
@@ -89,14 +89,14 @@ uses
   ModernSyntax.Objects,
   Nidus.Exception;
 
-function RouteModule(const APath: String; const AModule: TModuleClass): TRouteModule;
+function RouteModule(const APath: string; const AModule: TModuleClass): TRouteModule;
 begin
   Result := nil;
   if Assigned(AModule) then
     Result := TRouteModule.AddModule(APath, AModule, nil{, []}) as TRouteModule;
 end;
 
-function RouteModule(const APath: String; const AModule: TModuleClass;
+function RouteModule(const APath: string; const AModule: TModuleClass;
   const AMiddlewares: TMiddlewares): TRouteModule;
 begin
   Result := nil;
@@ -106,7 +106,7 @@ begin
                                      AMiddlewares) as TRouteModule;
 end;
 
-function RouteChild(const APath: String; const AModule: TModuleClass;
+function RouteChild(const APath: string; const AModule: TModuleClass;
   const AMiddlewares: TMiddlewares): TRouteChild;
 begin
   Result := TRouteChild.AddModule(APath,
@@ -196,13 +196,13 @@ end;
 procedure TModule._RouteHandlers;
 var
   LHandler: TClass;
-  LObjectEx: TModernObject;
+  LObject: TModernObject;
 begin
-  LObjectEx := FNidusInject^.Get<TModernObject>;
-  if not Assigned(LObjectEx) then
+  LObject := FNidusInject^.Get<TModernObject>;
+  if not Assigned(LObject) then
     Exit;
   for LHandler in RouteHandlers do
-    FRouteHandlers.Add(TRouteHandler(LObjectEx.Factory(LHandler)));
+    FRouteHandlers.Add(TRouteHandler(LObject.Factory(LHandler)));
 end;
 
 end.

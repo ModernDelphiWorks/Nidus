@@ -84,8 +84,9 @@ begin
 end;
 
 function TModuleProvider.Start(const AModule: TModuleAbstract;
-  const AInitialRoutePath: String): TResultPair<Boolean, String>;
+  const AInitialRoutePath: string): TResultPair<Boolean, string>;
 begin
+  Result.Success(False);
   try
     FTracker.RunApp(AModule, AInitialRoutePath);
     FListener := FNidusInject^.Get<TAppListener>;
@@ -96,15 +97,16 @@ begin
   end;
 end;
 
-function TModuleProvider.DisposeModule(
-  const APath: String): TResultPair<Boolean, String>;
+function TModuleProvider.DisposeModule(const APath: string): TResultPair<Boolean, string>;
 var
   LRoute: TRouteAbstract;
-  LError: String;
-  LModuleName: String;
+  LError: string;
+  LModuleName: string;
 begin
+  Result.Success(False);
   try
-    LRoute := FTracker.DisposeModule(TRouteParam.Create(APath));
+//    LRoute := FTracker.DisposeModule(TRouteParam.Create(APath));
+    LRoute := FTracker.FindRoute(TRouteParam.Create(APath));
     if LRoute = nil then
     begin
       LError := Format('Nidus route (%s) not found!', [APath]);

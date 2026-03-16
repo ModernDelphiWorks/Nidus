@@ -46,7 +46,7 @@ type
     class var FListener: TAppListener;
   private
     FNidusInject: PNidusInject;
-    FInitialRoutePath: String;
+    FInitialRoutePath: string;
     FAppModule: TModule;
     FRouteParse: TRouteParse;
     FModuleService: TModuleService;
@@ -56,7 +56,7 @@ type
     FGuardCallback: TGuardCallback;
     FRegister: TRegister;
     FRPCProviderServer: IRPCProviderServer;
-    procedure _ResolveDisposeRouteModule(const APath: String);
+    procedure _ResolveDisposeRouteModule(const APath: string);
   public
     constructor Create;
     destructor Destroy; override;
@@ -64,20 +64,20 @@ type
     procedure IncludeBindService(const AService: TBindService);
     procedure IncludeRouteParser(const ARouteParse: TRouteParse);
     function Start(const AModule: TModule;
-      const AInitialRoutePath: String = '/'): TNidus;
+      const AInitialRoutePath: string = '/'): TNidus;
     procedure Finalize;
-    procedure DisposeRouteModule(const APath: String);
+    procedure DisposeRouteModule(const APath: string);
     procedure RegisterRouteHandler(const ARouteHandler: TRouteHandlerClass);
-    procedure Listener(const AMessage: String);
+    procedure Listener(const AMessage: string);
     function UseGuard(const AGuardCallback: TGuardCallback): TNidus;
     function UsePipes(const AValidationPipe: IValidationPipe): TNidus;
     function UseRPC(const ARPCProviderServer: IRPCProviderServer): TNidus;
     class function UseListener(const AListener: TListener): TNidus;
-    function PublishRPC(const ARPCName: String; const ARPCClass: TRPCResourceClass): TNidus;
-    function LoadRouteModule(const APath: String;
+    function PublishRPC(const ARPCName: string; const ARPCClass: TRPCResourceClass): TNidus;
+    function LoadRouteModule(const APath: string;
       const AReq: IRouteRequest = nil): TReturnPair;
-    function Get<T: class, constructor>(ATag: String = ''): T;
-    function GetInterface<I: IInterface>(ATag: String = ''): I;
+    function Get<T: class, constructor>(ATag: string = ''): T;
+    function GetInterface<I: IInterface>(ATag: string = ''): I;
     function Request: IRouteRequest;
   end;
 
@@ -97,27 +97,32 @@ begin
   FNidusInject := GNidusInject;
   if not Assigned(FNidusInject) then
     raise EAppInjector.Create;
+
   FModuleStarted := False;
   FRegister := FNidusInject^.Get<TRegister>;
 end;
 
 destructor TNidus.Destroy;
 begin
-  FNidusInject := nil;
   if Assigned(FBindService) then
     FBindService.Free;
+
   if Assigned(FModuleService) then
     FModuleService.Free;
+
   if Assigned(FRouteParse) then
     FRouteParse.Free;
-  FModuleStarted := False;
+
   if Assigned(FRPCProviderServer) then
     FRPCProviderServer.Stop;
+
+  FModuleStarted := False;
+  FNidusInject := nil;
   FRegister := nil;
   inherited;
 end;
 
-function TNidus.GetInterface<I>(ATag: String = ''): I;
+function TNidus.GetInterface<I>(ATag: string = ''): I;
 var
   LResult: TResultPair<I, Exception>;
 begin
@@ -134,7 +139,7 @@ begin
   Result := LResult.ValueSuccess;
 end;
 
-function TNidus.Get<T>(ATag: String): T;
+function TNidus.Get<T>(ATag: string): T;
 var
   LResult: TResultPair<T, Exception>;
 begin
@@ -167,7 +172,7 @@ begin
 end;
 
 function TNidus.Start(const AModule: TModule;
-  const AInitialRoutePath: String): TNidus;
+  const AInitialRoutePath: string): TNidus;
 var
   LModule: TClass;
 begin
@@ -271,7 +276,7 @@ begin
   Result := FRequest;
 end;
 
-procedure TNidus.DisposeRouteModule(const APath: String);
+procedure TNidus.DisposeRouteModule(const APath: string);
 begin
   _ResolveDisposeRouteModule(APath);
 end;
@@ -283,11 +288,11 @@ begin
   FNidusInject^.ExtractInject<TNidusInject>(C_NIDUS);
 end;
 
-procedure TNidus._ResolveDisposeRouteModule(const APath: String);
+procedure TNidus._ResolveDisposeRouteModule(const APath: string);
 var
   LRoutes: TStringDynArray;
-  LRoute: String;
-  LRouteParts: String;
+  LRoute: string;
+  LRouteParts: string;
 begin
   LRouteParts := '';
   LRoutes := SplitString(APath, '/');

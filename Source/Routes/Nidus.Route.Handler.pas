@@ -25,17 +25,17 @@ type
   TRouteHandler = class abstract
   private
     FNidusInject: PNidusInject;
-    procedure _RegisterRouteHandle(const ARoute: String);
+    procedure _RegisterRouteHandle(const ARoute: string);
   protected
     procedure RegisterRoutes; virtual; abstract;
   public
     constructor Create; overload; virtual;
     destructor Destroy; override;
-    function RouteGet(const ARoute: String): TRouteHandler; virtual;
-    function RoutePost(const ARoute: String): TRouteHandler; virtual;
-    function RoutePut(const ARoute: String): TRouteHandler; virtual;
-    function RouteDelete(const ARoute: String): TRouteHandler; virtual;
-    function RoutePatch(const ARoute: String): TRouteHandler; virtual;
+    function RouteGet(const ARoute: string): TRouteHandler; virtual;
+    function RoutePost(const ARoute: string): TRouteHandler; virtual;
+    function RoutePut(const ARoute: string): TRouteHandler; virtual;
+    function RouteDelete(const ARoute: string): TRouteHandler; virtual;
+    function RoutePatch(const ARoute: string): TRouteHandler; virtual;
   end;
 
   TRouteHandlerClass = class of TRouteHandler;
@@ -60,37 +60,37 @@ begin
   inherited;
 end;
 
-function TRouteHandler.RouteDelete(const ARoute: String): TRouteHandler;
+function TRouteHandler.RouteDelete(const ARoute: string): TRouteHandler;
 begin
   Result := Self;
   _RegisterRouteHandle(ARoute);
 end;
 
-function TRouteHandler.RouteGet(const ARoute: String): TRouteHandler;
+function TRouteHandler.RouteGet(const ARoute: string): TRouteHandler;
 begin
   Result := Self;
   _RegisterRouteHandle(ARoute);
 end;
 
-function TRouteHandler.RoutePatch(const ARoute: String): TRouteHandler;
+function TRouteHandler.RoutePatch(const ARoute: string): TRouteHandler;
 begin
   Result := Self;
   _RegisterRouteHandle(ARoute);
 end;
 
-function TRouteHandler.RoutePost(const ARoute: String): TRouteHandler;
+function TRouteHandler.RoutePost(const ARoute: string): TRouteHandler;
 begin
   Result := Self;
   _RegisterRouteHandle(ARoute);
 end;
 
-function TRouteHandler.RoutePut(const ARoute: String): TRouteHandler;
+function TRouteHandler.RoutePut(const ARoute: string): TRouteHandler;
 begin
   Result := Self;
   _RegisterRouteHandle(ARoute);
 end;
 
-procedure TRouteHandler._RegisterRouteHandle(const ARoute: String);
+procedure TRouteHandler._RegisterRouteHandle(const ARoute: string);
 var
   LRegister: TRegister;
 begin

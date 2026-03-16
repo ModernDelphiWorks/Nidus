@@ -47,28 +47,28 @@ type
 
   TSingletonBind<T: class, constructor> = class(TBind<T>)
   public
-    procedure IncludeInjector(const AAppInjector: TInject); override;
+    procedure IncludeInject(const ANidusInject: TInject); override;
   end;
 
   TSingletonLazyBind<T: class, constructor> = class(TBind<T>)
   public
-    procedure IncludeInjector(const AAppInjector: TInject); override;
+    procedure IncludeInject(const ANidusInject: TInject); override;
   end;
 
   TFactoryBind<T: class, constructor> = class(TBind<T>)
   public
-    procedure IncludeInjector(const AAppInjector: TInject); override;
+    procedure IncludeInject(const ANidusInject: TInject); override;
   end;
 
   TSingletonInterfaceBind<I: IInterface; T: class, constructor> = class(TBind<T>)
   public
-    procedure IncludeInjector(const AAppInjector: TInject); override;
+    procedure IncludeInject(const ANidusInject: TInject); override;
   end;
 
   TAddInstanceBind<T: class, constructor> = class(TBind<T>)
   public
     constructor Create(const AInstance: TObject); overload;
-    procedure IncludeInjector(const AAppInjector: TInject); override;
+    procedure IncludeInject(const ANidusInject: TInject); override;
   end;
 
 implementation
@@ -122,30 +122,30 @@ end;
 
 { TSingletonBind }
 
-procedure TSingletonBind<T>.IncludeInjector(const AAppInjector: TInject);
+procedure TSingletonBind<T>.IncludeInject(const ANidusInject: TInject);
 begin
-  AAppInjector.Singleton<T>(FOnCreate, FOnDestroy, FOnParams);
+  ANidusInject.Singleton<T>(FOnCreate, FOnDestroy, FOnParams);
 end;
 
 { TSingletonLazyBind<T> }
 
-procedure TSingletonLazyBind<T>.IncludeInjector(const AAppInjector: TInject);
+procedure TSingletonLazyBind<T>.IncludeInject(const ANidusInject: TInject);
 begin
-  AAppInjector.SingletonLazy<T>(FOnCreate, FOnDestroy, FOnParams);
+  ANidusInject.SingletonLazy<T>(FOnCreate, FOnDestroy, FOnParams);
 end;
 
 { TFactoryBind<T> }
 
-procedure TFactoryBind<T>.IncludeInjector(const AAppInjector: TInject);
+procedure TFactoryBind<T>.IncludeInject(const ANidusInject: TInject);
 begin
-  AAppInjector.Factory<T>(FOnCreate, FOnDestroy, FOnParams);
+  ANidusInject.Factory<T>(FOnCreate, FOnDestroy, FOnParams);
 end;
 
 { TSingletonInterfaceBind<T> }
 
-procedure TSingletonInterfaceBind<I, T>.IncludeInjector(const AAppInjector: TInject);
+procedure TSingletonInterfaceBind<I, T>.IncludeInject(const ANidusInject: TInject);
 begin
-  AAppInjector.SingletonInterface<I, T>('', FOnCreate, FOnDestroy, FOnParams);
+  ANidusInject.SingletonInterface<I, T>('', FOnCreate, FOnDestroy, FOnParams);
 end;
 
 { TAddInstanceBind<T> }
@@ -155,16 +155,11 @@ begin
   FAddInstance := Ainstance;
 end;
 
-procedure TAddInstanceBind<T>.IncludeInjector(const AAppInjector: TInject);
+procedure TAddInstanceBind<T>.IncludeInject(const ANidusInject: TInject);
 begin
-  AAppInjector.AddInstance<T>(FAddInstance);
+  ANidusInject.AddInstance<T>(FAddInstance);
 end;
 
 end.
-
-
-
-
-
 
 
