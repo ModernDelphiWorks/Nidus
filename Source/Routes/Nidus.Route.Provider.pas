@@ -22,6 +22,7 @@ uses
   Nidus.Exception,
   Nidus.Tracker,
   Nidus.Module.Abstract,
+  Nidus.Module.Cache.Interfaces,
   Nidus.Inject,
   Nidus.Listener,
   Nidus.Route,
@@ -84,6 +85,11 @@ function TRouteProvider.GetRoute(const AArgs: TRouteParam): TResultPair<TRouteAb
 var
   LListener: TAppListener;
   LObject: TModernObject;
+  LCache: IModuleCache;
+  LCreated: Boolean;
+  LMessage: string;
+  LFactory: TFunc<TObject>;
+  LModuleClass: TClass;
 begin
   Result.Success(FTracker.FindRoute(AArgs));
   if Result.ValueSuccess = nil then
@@ -94,13 +100,35 @@ begin
   //
   if not Assigned(Result.ValueSuccess.ModuleInstance) then
   begin
-    Result.ValueSuccess.ModuleInstance := LObject.Factory(Result.ValueSuccess.Module);
+    LCreated := True;
+    LModuleClass := Result.ValueSuccess.Module;
+    LCache := GetGlobalModuleCache;
+    if Assigned(LCache) then
+    begin
+      LFactory :=
+        function: TObject
+        begin
+          Result := LObject.Factory(LModuleClass);
+        end;
+      Result.ValueSuccess.ModuleInstance := LCache.ResolveInstance(LModuleClass, LFactory);
+    end
+    else
+      Result.ValueSuccess.ModuleInstance := LObject.Factory(LModuleClass);
+
+    if Assigned(LCache) and LCache.IsEnabledFor(LModuleClass) and Assigned(Result.ValueSuccess.ModuleInstance) then
+      LCreated := False;
+
     if Assigned(LListener) then
-      LListener.Execute(FormatListenerMessage(Format('[InstanceLoader] %s dependencies initialized', [Result.ValueSuccess.ModuleInstance.ClassName])));
+    begin
+      if LCreated then
+        LMessage := Format('[InstanceLoader] %s dependencies initialized', [Result.ValueSuccess.ModuleInstance.ClassName])
+      else
+        LMessage := Format('[InstanceLoader] %s dependencies loaded from cache', [Result.ValueSuccess.ModuleInstance.ClassName]);
+      LListener.Execute(FormatListenerMessage(LMessage));
+    end;
   end;
   // Go to middleware events if they exist.
   _RouteMiddleware(Result.ValueSuccess);
 end;
 
 end.
-

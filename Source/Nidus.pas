@@ -1,4 +1,4 @@
-﻿{
+﻿﻿{
   ------------------------------------------------------------------------------
   Nidus
   Modular and scalable application framework for Delphi,
@@ -26,6 +26,8 @@ uses
   Generics.Collections,
   Inject.Service,
   ModernSyntax.ResultPair,
+  Nidus.Module.Cache.Interfaces,
+  Nidus.Pooling.Interfaces,
   Nidus.Module,
   Nidus.Route.Parse,
   Nidus.Module.Service,
@@ -71,6 +73,16 @@ type
     procedure Listener(const AMessage: string);
     function UseGuard(const AGuardCallback: TGuardCallback): TNidus;
     function UsePipes(const AValidationPipe: IValidationPipe): TNidus;
+    function UseCache(const ACache: IModuleCache): TNidus; overload;
+    function UseCache(const ACache: IModuleCache; const AModules: array of TClass): TNidus; overload;
+    function Cache: IModuleCache;
+    function UsePools(const ARegistry: IPoolRegistry): TNidus; overload;
+    function UsePools<T: class, constructor>(const AMaxSize: Integer = 256): TNidus; overload;
+    function UsePools<T: TComponent>(const AMaxSize: Integer = 32;
+      const AOwner: TComponent = nil; const AReset: TProc<T> = nil): TNidus; overload;
+    function UseComponentPool<T: TComponent>(const AMaxSize: Integer = 32;
+      const AOwner: TComponent = nil; const AReset: TProc<T> = nil): TNidus; overload;
+    function Pools: IPoolRegistry;
     function UseRPC(const ARPCProviderServer: IRPCProviderServer): TNidus;
     class function UseListener(const AListener: TListener): TNidus;
     function PublishRPC(const ARPCName: string; const ARPCClass: TRPCResourceClass): TNidus;
@@ -79,11 +91,17 @@ type
     function Get<T: class, constructor>(ATag: string = ''): T;
     function GetInterface<I: IInterface>(ATag: string = ''): I;
     function Request: IRouteRequest;
+    procedure WithPool<T: class>(const AProc: TProc<T>); overload;
+    procedure WithPool<T: class>(const AKey: string; const AProc: TProc<T>); overload;
   end;
 
 function GetNidus: TNidus;
 
 implementation
+
+uses
+  Nidus.Pooling.Registry,
+  Nidus.Pooling.Helpers;
 
 { TNidus }
 
@@ -137,6 +155,65 @@ begin
       raise AValue;
     end);
   Result := LResult.ValueSuccess;
+end;
+
+function TNidus.UseCache(const ACache: IModuleCache): TNidus;
+begin
+  SetGlobalModuleCache(ACache);
+  Result := Self;
+end;
+
+function TNidus.UseCache(const ACache: IModuleCache; const AModules: array of TClass): TNidus;
+begin
+  UseCache(ACache);
+  if Assigned(ACache) then
+    ACache.SetPolicy(AModules);
+  Result := Self;
+end;
+
+function TNidus.Cache: IModuleCache;
+begin
+  Result := GetGlobalModuleCache;
+end;
+
+function TNidus.UsePools(const ARegistry: IPoolRegistry): TNidus;
+begin
+  SetGlobalPoolRegistry(ARegistry);
+  Result := Self;
+end;
+
+function TNidus.UsePools<T>(const AMaxSize: Integer): TNidus;
+begin
+  TPoolRegistry.RegisterDefaultObjectPool<T>(AMaxSize);
+  Result := Self;
+end;
+
+function TNidus.UsePools<T>(const AMaxSize: Integer; const AOwner: TComponent;
+  const AReset: TProc<T>): TNidus;
+begin
+  TPoolRegistry.RegisterDefaultComponentPool<T>(AMaxSize, AOwner, AReset);
+  Result := Self;
+end;
+
+function TNidus.UseComponentPool<T>(const AMaxSize: Integer; const AOwner: TComponent;
+  const AReset: TProc<T>): TNidus;
+begin
+  Result := UsePools<T>(AMaxSize, AOwner, AReset);
+end;
+
+function TNidus.Pools: IPoolRegistry;
+begin
+  Result := GetGlobalPoolRegistry;
+end;
+
+procedure TNidus.WithPool<T>(const AProc: TProc<T>);
+begin
+  TPoolHelpers.WithPool<T>(AProc);
+end;
+
+procedure TNidus.WithPool<T>(const AKey: string; const AProc: TProc<T>);
+begin
+  TPoolHelpers.WithPool<T>(AKey, AProc);
 end;
 
 function TNidus.Get<T>(ATag: string): T;
@@ -306,4 +383,3 @@ begin
 end;
 
 end.
-

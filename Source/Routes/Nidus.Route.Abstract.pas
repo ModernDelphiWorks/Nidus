@@ -1,4 +1,4 @@
-﻿{
+{
   ------------------------------------------------------------------------------
   Nidus
   Modular and scalable application framework for Delphi,
@@ -84,8 +84,8 @@ end;
 
 destructor TRouteAbstract.Destroy;
 begin
-  if FModuleInstance <> nil then
-    FModuleInstance.Free;
+//  if FModuleInstance <> nil then
+//    FModuleInstance.Free;
   inherited;
 end;
 

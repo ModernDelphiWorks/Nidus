@@ -25,7 +25,8 @@ uses
   Nidus.Module.Abstract,
   Nidus.Route.Abstract,
   Nidus.Listener,
-  Nidus.Inject;
+  Nidus.Inject,
+  Nidus.Module.Cache.Interfaces;
 
 type
   TModuleProvider = class
@@ -102,6 +103,7 @@ var
   LRoute: TRouteAbstract;
   LError: string;
   LModuleName: string;
+  LCache: IModuleCache;
 begin
   Result.Success(False);
   try
@@ -113,9 +115,15 @@ begin
       Result.Failure(LError);
       Exit;
     end;
+    if not Assigned(LRoute.ModuleInstance) then
+    begin
+      Result.Success(True);
+      Exit;
+    end;
     LModuleName := LRoute.ModuleInstance.ClassName;
-    // Shouldn't change to .Free, as it also needs to receive Nil.
-    FreeAndNil(LRoute.ModuleInstance);
+    LCache := GetGlobalModuleCache;
+    if (not Assigned(LCache)) or (not LCache.IsEnabledFor(LRoute.Module)) then
+      FreeAndNil(LRoute.ModuleInstance);
     if Assigned(FListener) then
       FListener.Execute(FormatListenerMessage(Format('[InstanceLoader] %s dependencies finalized', [LModuleName])));
     Result.Success(True);
@@ -131,10 +139,5 @@ begin
 end;
 
 end.
-
-
-
-
-
 
 
